@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML
+    xmlns="UnityEngine.UIElements"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+>
+    <!-- https://docs.unity3d.com/Manual/UIE-ElementRef.html -->
+
+    <uie:ObjectField label="Avatar" name="avatar-field" />
+    <uie:ObjectField label="Asset" name="asset-field" />
+
+    <Button text="Apply" name="apply-button" />
+</UXML>

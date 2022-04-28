@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML
+    xmlns="UnityEngine.UIElements"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+>
+    <!-- https://docs.unity3d.com/Manual/UIE-ElementRef.html -->
+
+    <uie:ObjectField label="Unmodified Avatar" name="avatar-field" />
+    <uie:ObjectField label="Unmodified Asset" name="asset-field" />
+    <Button text="Create Targets" name="duplicate-button" />
+    <uie:ObjectField label="Target Avatar" name="target-field" />
+    <Button text="Generate" name="generate-button" />
+</UXML>

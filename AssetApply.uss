@@ -1,0 +1,7 @@
+:root {
+    padding: 12px;
+}
+
+#apply-button {
+    margin-top: 12px;
+}

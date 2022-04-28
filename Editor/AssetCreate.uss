@@ -1,0 +1,12 @@
+:root {
+    padding: 12px;
+}
+
+#duplicate-button {
+    margin-bottom: 12px;
+}
+
+#generate-button {
+    margin-top: 24px;
+    font-size: 14px;
+}

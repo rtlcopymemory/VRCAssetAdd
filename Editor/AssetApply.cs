@@ -28,6 +28,11 @@ public class AssetApply : EditorWindow
         var duplicateBtn = root.Q<Button>("apply-button");
         duplicateBtn.RegisterCallback<MouseUpEvent>((evt) => { Apply(); });
 
+        SetupObjectFields(root);
+    }
+
+    private static void SetupObjectFields(VisualElement root)
+    {
         var avatarField = root.Q<ObjectField>("avatar-field");
         avatarField.objectType = typeof(GameObject);
 
@@ -49,20 +54,8 @@ public class AssetApply : EditorWindow
             return;
         }
 
-        var avatarBak = Instantiate(avatar);
-        var assetBak = Instantiate(asset);
-
-        avatarBak.name = $"{avatar.name} Backup";
-        assetBak.name = $"{asset.name} Backup";
-
-        avatarBak.SetActive(false);
-        assetBak.SetActive(false);
-
-        if (PrefabUtility.IsAnyPrefabInstanceRoot(avatar))
-            PrefabUtility.UnpackPrefabInstance(avatar, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-
-        if (PrefabUtility.IsAnyPrefabInstanceRoot(asset))
-            PrefabUtility.UnpackPrefabInstance(asset, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+        BackupObjects(avatar, asset);
+        ExtractPrefabs(avatar, asset);
 
         string path = EditorUtility.OpenFilePanel("Open JSON Diffs", "", "json");
         string jsonStirng = File.ReadAllText(path);
@@ -75,12 +68,33 @@ public class AssetApply : EditorWindow
 
             if (avatar_go == null)
                 ShowError($"Avatar GameObject could not be found: {ToNewRoot(difference.ModelPath, avatar.name)}");
-            
+
             if (asset_go == null)
                 ShowError($"Asset GameObject could not be found: {ToNewRoot(difference.AssetPath, asset.name)}");
 
             asset_go.transform.parent = avatar_go.transform;
         }
+    }
+
+    private static void ExtractPrefabs(GameObject avatar, GameObject asset)
+    {
+        if (PrefabUtility.IsAnyPrefabInstanceRoot(avatar))
+            PrefabUtility.UnpackPrefabInstance(avatar, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+
+        if (PrefabUtility.IsAnyPrefabInstanceRoot(asset))
+            PrefabUtility.UnpackPrefabInstance(asset, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+    }
+
+    private static void BackupObjects(GameObject avatar, GameObject asset)
+    {
+        var avatarBak = Instantiate(avatar);
+        var assetBak = Instantiate(asset);
+
+        avatarBak.name = $"{avatar.name} Backup";
+        assetBak.name = $"{asset.name} Backup";
+
+        avatarBak.SetActive(false);
+        assetBak.SetActive(false);
     }
 
     private string ToNewRoot(string fromFile, string rootName)

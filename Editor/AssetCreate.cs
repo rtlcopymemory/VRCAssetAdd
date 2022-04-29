@@ -36,12 +36,17 @@ public class AssetCreate : EditorWindow
         generateButton.RegisterCallback<MouseUpEvent>((evt) => { GenerateFiles(); });
 
         // Assign type to ObjectFields
+        SetupObjectFields();
+    }
+
+    private void SetupObjectFields()
+    {
         var avatarField = rootVisualElement.Q<ObjectField>("avatar-field");
         avatarField.objectType = typeof(GameObject);
 
         var assetField = rootVisualElement.Q<ObjectField>("asset-field");
         assetField.objectType = typeof(GameObject);
-        
+
         var targetField = rootVisualElement.Q<ObjectField>("target-field");
         targetField.objectType = typeof(GameObject);
     }

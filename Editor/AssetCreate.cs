@@ -86,7 +86,10 @@ public class AssetCreate : EditorWindow
         var searcher = new AssetSearch(target.transform, asset.transform, avatar.transform);
         var differences = searcher.Search();
 
-        // var json = DifferencesToJson(differences);
+        // Sorting from deeper to less deep. This is needed so it won't move the root of the asset before the rest
+        differences.Sort((a, b) => a.AssetPath.Split('/').Length.CompareTo(b.AssetPath.Split('/').Length));
+        differences.Reverse();
+        
         var json = JsonHelper.ToJson(differences.ToArray());
 
         var path = EditorUtility.SaveFilePanel(
@@ -104,25 +107,5 @@ public class AssetCreate : EditorWindow
         File.WriteAllText(path, json);
     }
 
-    private string DifferencesToJson(List<AssetDifference> differences)
-    {
-        var objects = new List<string>();
-
-        foreach (var difference in differences)
-        {
-            objects.Add("{\n" +
-                $"{ModelKey}: \"{difference.ModelPath}\",\n" +
-                $"{AssetKey}: \"{difference.AssetPath}\"\n" +
-                "}"
-            );
-        }
-
-        var sb = new StringBuilder();
-        sb.AppendLine("[");
-
-        sb.Append(string.Join(",", objects));
-
-        sb.AppendLine("\n]");
-        return sb.ToString();
-    }
+    
 }

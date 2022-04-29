@@ -36,3 +36,6 @@ You will then have to provide this file along with the asset prefab to your clie
 
 If you found this tool useful or appreciate my work, you can select an amount to when getting it from [My Gumroad](https://sesilaso.gumroad.com/).  
 Alternatively you can [get me a coffee](https://ko-fi.com/thatonepizza)
+
+## Wanted features for the future
+- Animator layer transfer to easily setup toggles too

@@ -5,23 +5,23 @@
 - [Donations](#donations)
 
 ## For users
-![Apply asset dropdown menu](https://imgur.com/eJClbDW)  
+![Apply asset dropdown menu](https://i.imgur.com/eJClbDW.png)  
 
 Drag into your scene the prefab of the asset you want to add to your avatar and your avatar, leave them **unmodified**.
 
-![Imgur](https://imgur.com/7rk7Sq5)  
+![Imgur](https://i.imgur.com/7rk7Sq5.png)  
 
 Drag and drop, from the scene's Hierarchy, your avatar and the asset you want to add into the Apply From File window.  
 
 Press Apply.
 
 ## For creators
-![Create dropdown menu](https://imgur.com/j43iW0x)  
+![Create dropdown menu](https://i.imgur.com/j43iW0x.png)  
 
 Create a prefab of your asset with all your settings (for example, your Phybones or Contact Receivers).  
 Drag that prefab in your scene along with the avatar base you want to create the setup for, DO NOT MODIFY THE ORIGINALS.  
 
-![Imgur](https://imgur.com/cqTrgj3)  
+![Imgur](https://i.imgur.com/cqTrgj3.png)  
 
 Drag and drop, from the scene's Hierarchy, the **unmodified** avatar and asset (prefab) into the Asset Create window.  
 Click `Create Targets`, this will hide your original objects and create a duplicate with which you will work with.

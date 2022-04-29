@@ -37,6 +37,19 @@ namespace Assets.VRCAssetAdd.Editor
         private void RecursiveSearch(Transform original, Transform targetAvatar, ref Stack<string> path, ref List<AssetDifference> result)
         {
             path.Push(targetAvatar.name);
+            int[] mapping = new int[original.childCount];
+
+            for (int i = 0; i < original.childCount; i++)
+            {
+                for (int j = 0; j < targetAvatar.childCount; j++)
+                {
+                    if (original.GetChild(i).name == targetAvatar.GetChild(j).name)
+                    {
+                        mapping[i] = j;
+                        continue;
+                    }
+                }
+            }
 
             if (original.childCount < targetAvatar.childCount)
             {
@@ -49,7 +62,10 @@ namespace Assets.VRCAssetAdd.Editor
                     for (int j = 0; j < original.childCount; j++)
                     {
                         if (child.name == original.GetChild(j).name)
+                        {
+
                             found = true;
+                        }
                     }
 
                     if (!found)
@@ -75,7 +91,7 @@ namespace Assets.VRCAssetAdd.Editor
 
             for (int i = 0; i < original.childCount; i++)
             {
-                RecursiveSearch(original.GetChild(i), targetAvatar.GetChild(i), ref path, ref result);
+                RecursiveSearch(original.GetChild(i), targetAvatar.GetChild(mapping[i]), ref path, ref result);
             }
             path.Pop();
         }

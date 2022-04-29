@@ -49,6 +49,15 @@ public class AssetApply : EditorWindow
             return;
         }
 
+        var avatarBak = Instantiate(avatar);
+        var assetBak = Instantiate(asset);
+
+        avatarBak.name = $"{avatar.name} Backup";
+        assetBak.name = $"{asset.name} Backup";
+
+        avatarBak.SetActive(false);
+        assetBak.SetActive(false);
+
         if (PrefabUtility.IsAnyPrefabInstanceRoot(avatar))
             PrefabUtility.UnpackPrefabInstance(avatar, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
 
@@ -91,8 +100,10 @@ public class AssetApply : EditorWindow
         if (oldErr != null)
             rootVisualElement.Remove(oldErr);
 
-        var msg = new Label(message);
-        msg.name = "Error";
+        var msg = new Label(message)
+        {
+            name = "Error"
+        };
         rootVisualElement.Add(msg);
     }
 }

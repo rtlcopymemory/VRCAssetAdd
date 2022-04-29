@@ -128,8 +128,10 @@ public class AssetCreate : EditorWindow
         if (oldErr != null)
             rootVisualElement.Remove(oldErr);
 
-        var msg = new Label(message);
-        msg.name = "Error";
+        var msg = new Label(message)
+        {
+            name = "Error"
+        };
         rootVisualElement.Add(msg);
     }
 }

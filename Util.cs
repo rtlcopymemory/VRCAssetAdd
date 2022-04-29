@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.VRCAssetAdd.Editor
 {
-    internal class Util
+    public class Util
     {
         static public Transform FindDescent(Transform start, string key)
         {

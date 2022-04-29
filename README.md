@@ -10,6 +10,8 @@ Please backup your projects. I yet have to break my project because of this but 
 ## For users
 ![Apply asset dropdown menu](https://i.imgur.com/eJClbDW.png)  
 
+Please have unique names in ALL of your hierarchy, included the prefab name.
+
 Drag into your scene the prefab of the asset you want to add to your avatar and your avatar, leave them **unmodified**.
 
 ![Imgur](https://i.imgur.com/7rk7Sq5.png)  

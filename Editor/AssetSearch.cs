@@ -40,14 +40,29 @@ namespace Assets.VRCAssetAdd.Editor
 
             if (original.childCount < targetAvatar.childCount)
             {
-                int start = original.childCount;
+                // Find which indeces have been added
+                var newObjs = new List<int>();
+                for (int i = 0; i < targetAvatar.childCount; i++)
+                {
+                    var child = targetAvatar.GetChild(i);
+                    bool found = false;
+                    for (int j = 0; j < original.childCount; j++)
+                    {
+                        if (child.name == original.GetChild(j).name)
+                            found = true;
+                    }
+
+                    if (!found)
+                        newObjs.Add(i);
+                }
+
                 string currPath = string.Join("/", path.Reverse());
-                for (int i = start; i < targetAvatar.childCount; i++)
+                foreach (int i in newObjs)
                 {
                     var child = Util.FindDescent(asset, targetAvatar.GetChild(i).name);
                     if (child == null)
                     {
-                        throw new VRCAddException($"Could not find {targetAvatar.GetChild(i).name} in {asset.name}");
+                        throw new VRCAddException($"Could not find '{targetAvatar.GetChild(i).name}' in '{asset.name}'");
                     }
 
                     result.Add(new AssetDifference()

@@ -4,6 +4,9 @@
 - [For creators](#for-creators)
 - [Donations](#donations)
 
+## For everyone
+Please backup your projects. I yet have to break my project because of this but you might, so please backup.
+
 ## For users
 ![Apply asset dropdown menu](https://i.imgur.com/eJClbDW.png)  
 

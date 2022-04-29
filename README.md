@@ -13,7 +13,8 @@ Drag into your scene the prefab of the asset you want to add to your avatar and 
 
 Drag and drop, from the scene's Hierarchy, your avatar and the asset you want to add into the Apply From File window.  
 
-Press Apply.
+Press Apply, select the .json file that was given with the asset (or in any case, that someone made using this tool) and enjoy.  
+Once tested, you can delete the Backup duplicates that are automatically created.
 
 ## For creators
 ![Create dropdown menu](https://i.imgur.com/j43iW0x.png)  

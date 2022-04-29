@@ -5,3 +5,9 @@
 #apply-button {
     margin-top: 12px;
 }
+
+#Error {
+    color: red;
+    font-size: 16px;
+    margin-top: 10px;
+}

@@ -4,14 +4,10 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using Assets.VRCAssetAdd.Editor;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 public class AssetCreate : EditorWindow
 {
-    private static readonly string ModelKey = "\"model\"";
-    private static readonly string AssetKey = "\"asset\"";
-
     [MenuItem("VRCAssetAdd/Asset Create")]
     public static void ShowWindow()
     {
@@ -58,10 +54,17 @@ public class AssetCreate : EditorWindow
         var avatar = avatarField.value as GameObject;
         var asset = assetField.value as GameObject;
 
-        if (avatar == null || asset == null) return;
+        if (avatar == null || asset == null)
+        {
+            ShowError("You have to select the Unmodified items");
+            return;
+        }
 
         var target = Instantiate(avatar);
         var targetAsset = Instantiate(asset);
+
+        avatar.SetActive(false);
+        asset.SetActive(false);
 
         target.transform.position = new Vector3(target.transform.position.x + 2, target.transform.position.y, target.transform.position.z);
         target.name = avatar.name + " - Target";
@@ -81,10 +84,22 @@ public class AssetCreate : EditorWindow
         var asset = assetField.value as GameObject;
         var avatar = avatarField.value as GameObject;
 
-        if (avatar == null || asset == null || target == null) return;
+        if (avatar == null || asset == null || target == null)
+        {
+            ShowError("You have to select all three items");
+            return;
+        }
 
         var searcher = new AssetSearch(target.transform, asset.transform, avatar.transform);
-        var differences = searcher.Search();
+        List<AssetDifference> differences;
+        try
+        {
+            differences = searcher.Search();
+        } catch (VRCAddException ex)
+        {
+            ShowError(ex.Message);
+            return;
+        }
 
         // Sorting from deeper to less deep. This is needed so it won't move the root of the asset before the rest
         differences.Sort((a, b) => a.AssetPath.Split('/').Length.CompareTo(b.AssetPath.Split('/').Length));
@@ -100,12 +115,21 @@ public class AssetCreate : EditorWindow
 
         if (path.Length == 0)
         {
-            Debug.LogError("Path was 0");
+            ShowError("Path was 0");
             return;
         }
 
         File.WriteAllText(path, json);
     }
 
-    
+    private void ShowError(string message)
+    {
+        var oldErr = rootVisualElement.Q("Error");
+        if (oldErr != null)
+            rootVisualElement.Remove(oldErr);
+
+        var msg = new Label(message);
+        msg.name = "Error";
+        rootVisualElement.Add(msg);
+    }
 }

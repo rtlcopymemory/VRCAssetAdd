@@ -43,7 +43,11 @@ public class AssetApply : EditorWindow
         var avatar = avatarField.value as GameObject;
         var asset = assetField.value as GameObject;
 
-        if (avatar == null || asset == null) return;
+        if (avatar == null || asset == null)
+        {
+            ShowError("Avatar or Asset not selected");
+            return;
+        }
 
         if (PrefabUtility.IsAnyPrefabInstanceRoot(avatar))
             PrefabUtility.UnpackPrefabInstance(avatar, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
@@ -61,10 +65,10 @@ public class AssetApply : EditorWindow
             var asset_go = GameObject.Find(ToNewRoot(difference.AssetPath, asset.name));
 
             if (avatar_go == null)
-                Debug.LogError($"Avatar GameObject could not be found: {ToNewRoot(difference.ModelPath, avatar.name)}");
+                ShowError($"Avatar GameObject could not be found: {ToNewRoot(difference.ModelPath, avatar.name)}");
             
             if (asset_go == null)
-                Debug.LogError($"Asset GameObject could not be found: {ToNewRoot(difference.AssetPath, asset.name)}");
+                ShowError($"Asset GameObject could not be found: {ToNewRoot(difference.AssetPath, asset.name)}");
 
             asset_go.transform.parent = avatar_go.transform;
         }
@@ -72,12 +76,23 @@ public class AssetApply : EditorWindow
 
     private string ToNewRoot(string fromFile, string rootName)
     {
-        if (fromFile == null || rootName == null) { 
-            Debug.LogError($"Something was null!\nfromFile: {fromFile} - rootName: {rootName}");
+        if (fromFile == null || rootName == null) {
+            ShowError($"Something was null!\nfromFile: {fromFile} - rootName: {rootName}");
             return null;
         }
 
         var parts = fromFile.Split('/');
         return fromFile.Replace(parts[0], rootName);
+    }
+
+    private void ShowError(string message)
+    {
+        var oldErr = rootVisualElement.Q("Error");
+        if (oldErr != null)
+            rootVisualElement.Remove(oldErr);
+
+        var msg = new Label(message);
+        msg.name = "Error";
+        rootVisualElement.Add(msg);
     }
 }

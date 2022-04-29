@@ -34,27 +34,33 @@ namespace Assets.VRCAssetAdd.Editor
             return result;
         }
 
-        private void RecursiveSearch(Transform original, Transform root, ref Stack<string> path, ref List<AssetDifference> result)
+        private void RecursiveSearch(Transform original, Transform targetAvatar, ref Stack<string> path, ref List<AssetDifference> result)
         {
-            path.Push(root.name);
+            path.Push(targetAvatar.name);
 
-            if (original.childCount < root.childCount)
+            if (original.childCount < targetAvatar.childCount)
             {
                 int start = original.childCount;
                 string currPath = string.Join("/", path.Reverse());
-                for (int i = start; i < root.childCount; i++)
+                for (int i = start; i < targetAvatar.childCount; i++)
                 {
+                    var child = Util.FindDescent(asset, targetAvatar.GetChild(i).name);
+                    if (child == null)
+                    {
+                        throw new VRCAddException($"Could not find {targetAvatar.GetChild(i).name} in {asset.name}");
+                    }
+
                     result.Add(new AssetDifference()
                     {
                         ModelPath = currPath,
-                        AssetPath = GetPathFromTransform(Util.FindDescent(asset, root.GetChild(i).name))
+                        AssetPath = GetPathFromTransform(child)
                     });
                 }
             }
 
             for (int i = 0; i < original.childCount; i++)
             {
-                RecursiveSearch(original.GetChild(i), root.GetChild(i), ref path, ref result);
+                RecursiveSearch(original.GetChild(i), targetAvatar.GetChild(i), ref path, ref result);
             }
             path.Pop();
         }

@@ -1,0 +1,12 @@
+:root {
+	padding: 12px;
+}
+
+.boxes {
+	padding: 6px;
+	margin-bottom: 6px;
+}
+
+.title {
+	-unity-font-style: bold;
+}

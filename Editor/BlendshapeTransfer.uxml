@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+>
+    <engine:Box class="boxes">
+        <engine:Label text="Import Blendshape" class="title" />
+        <editor:ObjectField label="Mesh" name="in_mesh" type="UnityEngine.GameObject" />
+        <engine:Button text="Import" name="in_btn" />
+    </engine:Box>
+
+    <engine:Box class="boxes">
+        <engine:Label text="Export Blendshape" class="title" />
+        <editor:ObjectField label="Mesh" name="out_mesh" type="UnityEngine.GameObject" />
+        <engine:VisualElement name="popup-container">
+        </engine:VisualElement>
+        <engine:Button text="Export" name="out_btn" />
+    </engine:Box>
+</engine:UXML>

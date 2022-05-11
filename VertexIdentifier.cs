@@ -15,7 +15,6 @@ namespace Assets.VRCAssetAdd
 
     public class VRCATriangle
     {
-        /// TODO: These needs to be the coordinates of the verticies
         public Vector3 a;
         public Vector3 b;
         public Vector3 c;

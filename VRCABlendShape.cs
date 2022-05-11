@@ -15,16 +15,21 @@ namespace Assets.VRCAssetAdd
         public Vector3[] VertDeltas { get; }
         public Vector3[] NormDeltas { get; }
         public Vector3[] TanDeltas { get; }
+        private Vector3 Scale;
 
         readonly private static string Signature = "BST1";
 
-        public VRCABlendShape(string name, VertexIdentifier[] verticies, Vector3[] vertDeltas, Vector3[] normDeltas, Vector3[] tanDeltas)
+        public VRCABlendShape(string name, Vector3 scale, VertexIdentifier[] verticies, Vector3[] vertDeltas, Vector3[] normDeltas, Vector3[] tanDeltas)
         {
             Name = name;
             Verticies = verticies;
             VertDeltas = vertDeltas;
             NormDeltas = normDeltas;
             TanDeltas = tanDeltas;
+            Scale = scale;
+
+            if (scale.x != scale.y || scale.y != scale.z)
+                throw new VRCAddException("Non uniform scale!");
 
             if (vertDeltas.Length != verticies.Length)
                 throw new VRCAddException("vertDeltas has wrong size!");
@@ -34,6 +39,33 @@ namespace Assets.VRCAssetAdd
 
             if (tanDeltas.Length != verticies.Length)
                 throw new VRCAddException("tanDeltas has wrong size!");
+        }
+
+        public Vector3 GetScale()
+        {
+            return Scale;
+        }
+
+        public void ToScale(Vector3 scale)
+        {
+            if (scale.x != scale.y || scale.y != scale.z)
+                throw new VRCAddException($"Non uniform scale! {scale}");
+
+            var factor = (1 / Scale.x) * scale.x;
+
+            for (int i = 0; i < Verticies.Length; i++)
+            {
+                Verticies[i].Position *= factor;
+                Verticies[i].Triangle.a *= factor;
+                Verticies[i].Triangle.b *= factor;
+                Verticies[i].Triangle.c *= factor;
+
+                VertDeltas[i] *= factor;
+                NormDeltas[i] *= factor;
+                TanDeltas[i] *= factor;
+            }
+
+            Scale = scale;
         }
 
         public static VRCABlendShape FromBytes(byte[] bytes)
@@ -46,6 +78,14 @@ namespace Assets.VRCAssetAdd
             {
                 throw new VRCAParsingException($"Signature did not match: {sign}");
             }
+
+            var scale = new Vector3
+            {
+                x = BitConverter.ToSingle(bytes, index),
+                y = BitConverter.ToSingle(bytes, index + 4),
+                z = BitConverter.ToSingle(bytes, index + 8)
+            };
+            index += 12;
 
             var nameLen = BitConverter.ToInt32(bytes, index);
             index += 4;
@@ -129,13 +169,16 @@ namespace Assets.VRCAssetAdd
                 index += 12;
             }
 
-            return new VRCABlendShape(name, verticies.ToArray(), vertDeltas.ToArray(), normDeltas.ToArray(), tanDeltas.ToArray());
+            return new VRCABlendShape(name, scale, verticies.ToArray(), vertDeltas.ToArray(), normDeltas.ToArray(), tanDeltas.ToArray());
         }
 
         public byte[] ConvertToBytes()
         {
             var bytes = new byte[0];
             bytes = bytes.Concat(Encoding.ASCII.GetBytes(Signature)).ToArray();
+            bytes = bytes.Concat(BitConverter.GetBytes(Scale.x)).ToArray();
+            bytes = bytes.Concat(BitConverter.GetBytes(Scale.y)).ToArray();
+            bytes = bytes.Concat(BitConverter.GetBytes(Scale.z)).ToArray();
             bytes = bytes.Concat(BitConverter.GetBytes(Name.Length)).ToArray();
             bytes = bytes.Concat(Encoding.ASCII.GetBytes(Name)).ToArray();
 
@@ -180,7 +223,9 @@ namespace Assets.VRCAssetAdd
 // +-------------------------------------------------------------------------------+
 // | 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 0A | 0B | 0C | 0D | 0E | 0F |
 // +-------------------------------------------------------------------------------+
-// |     Signature     |    Name Length    | Blendshape Name (variable size)       |
+// |     Signature     |      Scale.x      |      Scale.y      |      Scale.z      |
+// +-------------------------------------------------------------------------------+
+// |    Name Length    |              Blendshape Name (variable size)              |
 // +-------------------------------------------------------------------------------+
 // |     Position.x    |     Position.y    |     Position.z    |    Triangle.a.x   |
 // +-------------------------------------------------------------------------------+

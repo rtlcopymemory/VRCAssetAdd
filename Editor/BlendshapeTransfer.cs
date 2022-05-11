@@ -96,7 +96,7 @@ public class BlendshapeTransfer : EditorWindow
         var mesh = mr.sharedMesh;
         var shapeindex = mesh.GetBlendShapeIndex(blendshapeName);
         var frameCount = mesh.GetBlendShapeFrameCount(shapeindex);
-        
+
         Vector3[] vertices = new Vector3[mesh.vertexCount];
         Vector3[] normals = new Vector3[mesh.vertexCount];
         Vector3[] tangents = new Vector3[mesh.vertexCount];
@@ -117,7 +117,7 @@ public class BlendshapeTransfer : EditorWindow
         if (vertDeltas.Length != IdVerts.Count)
             throw new VRCAddException("Mismatches length of IDVerts and Deltas");
 
-        var bsFile = new VRCABlendShape(blendshapeName, IdVerts.ToArray(), vertDeltas, normDeltas, tanDeltas);
+        var bsFile = new VRCABlendShape(blendshapeName, mesh_go.transform.localScale, IdVerts.ToArray(), vertDeltas, normDeltas, tanDeltas);
 
         var path = EditorUtility.SaveFilePanel(
             "Save BlendShapeTransfer File",
@@ -177,7 +177,7 @@ public class BlendshapeTransfer : EditorWindow
     {
         for (int i = 0; i < mesh.triangles.Length; i += 3)
         {
-            if (mesh.triangles[i] == indexToContain || mesh.triangles[i+1] == indexToContain || mesh.triangles[i+2] == indexToContain)
+            if (mesh.triangles[i] == indexToContain || mesh.triangles[i + 1] == indexToContain || mesh.triangles[i + 2] == indexToContain)
             {
                 return new VRCATriangle()
                 {
@@ -202,8 +202,8 @@ public class BlendshapeTransfer : EditorWindow
         for (int i = 0; i < mesh.triangles.Length; i += 3)
         {
             if (tri.Contains(mesh.vertices[mesh.triangles[i]])
-                && tri.Contains(mesh.vertices[mesh.triangles[i+1]])
-                && tri.Contains(mesh.vertices[mesh.triangles[i+2]]))
+                && tri.Contains(mesh.vertices[mesh.triangles[i + 1]])
+                && tri.Contains(mesh.vertices[mesh.triangles[i + 2]]))
             {
                 return i;
             }
@@ -267,6 +267,9 @@ public class BlendshapeTransfer : EditorWindow
             ShowError($"BlendShape {bs.Name} already exists");
             return;
         }
+
+        if (mesh_go.transform.localScale.x != bs.GetScale().x)
+            bs.ToScale(mesh_go.transform.localScale);
 
         var vertMap = new int[bs.Verticies.Length];  // Map from VRCABlendShape indeces to Mesh indices
         int j = 0;

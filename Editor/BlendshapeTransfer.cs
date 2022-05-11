@@ -60,7 +60,7 @@ public class BlendshapeTransfer : EditorWindow
         if (mr == null)
         {
             // TODO: Add Error
-            Debug.LogError("Selected object did not have a skinned mesh renderer");
+            ShowError("Selected object did not have a skinned mesh renderer");
             return;
         }
 
@@ -89,8 +89,7 @@ public class BlendshapeTransfer : EditorWindow
 
         if (mr == null)
         {
-            // TODO: Add Error
-            Debug.LogError("Selected object did not have a skinned mesh renderer");
+            ShowError("Selected object did not have a skinned mesh renderer");
             return;
         }
 
@@ -110,9 +109,6 @@ public class BlendshapeTransfer : EditorWindow
                 affectedVerticies.Add(i);
         }
 
-        foreach (int i in affectedVerticies)
-            Debug.Log($"{i} at position {mesh.vertices[i].x} | {mesh.vertices[i].y} | {mesh.vertices[i].z}");
-
         var IdVerts = IdentifyVerticiesFromIndex(affectedVerticies, mesh);
         var vertDeltas = RemapDeltasArray(vertices, affectedVerticies);
         var normDeltas = RemapDeltasArray(normals, affectedVerticies);
@@ -131,7 +127,7 @@ public class BlendshapeTransfer : EditorWindow
 
         if (path.Length == 0)
         {
-            Debug.LogError("Path was 0");
+            ShowError("Path was 0");
             return;
         }
 
@@ -245,7 +241,7 @@ public class BlendshapeTransfer : EditorWindow
 
         if (path.Length == 0)
         {
-            Debug.LogError("Path was 0");
+            ShowError("Path was 0");
             return;
         }
 
@@ -257,7 +253,7 @@ public class BlendshapeTransfer : EditorWindow
         if (mr == null)
         {
             // TODO: Add Error
-            Debug.LogError("Selected object did not have a skinned mesh renderer");
+            ShowError("Selected object did not have a skinned mesh renderer");
             return;
         }
 
@@ -268,7 +264,7 @@ public class BlendshapeTransfer : EditorWindow
 
         if (mesh.GetBlendShapeIndex(bs.Name) != -1)
         {
-            Debug.LogError($"BlendShape {bs.Name} already exists");
+            ShowError($"BlendShape {bs.Name} already exists");
             return;
         }
 
@@ -285,8 +281,6 @@ public class BlendshapeTransfer : EditorWindow
                 vertMap[j++] = PositionToVertIndex(vert.Position, mesh);
                 continue;
             }
-
-            Debug.Log($"'{vert.Position}' Found tri: {mesh.triangles[tri]} {mesh.triangles[tri + 1]} {mesh.triangles[tri + 2]}");
 
             var found = false;
             for (int i = 0; i < 3; ++i)
@@ -326,5 +320,12 @@ public class BlendshapeTransfer : EditorWindow
         mesh.RecalculateNormals();
         mesh.RecalculateTangents();
         mesh.RecalculateBounds();
+    }
+
+    private void ShowError(string message)
+    {
+        var error = rootVisualElement.Q<Label>("error");
+        error.Clear();
+        error.text = message;
     }
 }

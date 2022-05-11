@@ -10,3 +10,8 @@
 .title {
 	-unity-font-style: bold;
 }
+
+#error {
+	margin: 6px;
+	color: red;
+}

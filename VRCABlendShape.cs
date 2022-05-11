@@ -10,11 +10,11 @@ namespace Assets.VRCAssetAdd
 {
     public class VRCABlendShape
     {
-        private string Name;
-        private VertexIdentifier[] Verticies;
-        private Vector3[] VertDeltas;
-        private Vector3[] NormDeltas;
-        private Vector3[] TanDeltas;
+        public string Name { get; }
+        public VertexIdentifier[] Verticies { get; }
+        public Vector3[] VertDeltas { get; }
+        public Vector3[] NormDeltas { get; }
+        public Vector3[] TanDeltas { get; }
 
         readonly private static string Signature = "BST1";
 
@@ -40,17 +40,17 @@ namespace Assets.VRCAssetAdd
         {
             int index = 0;
 
-            var sign = BitConverter.ToString(bytes, 0, Signature.Length);
+            var sign = Encoding.ASCII.GetString(bytes.Take(Signature.Length).ToArray());
             index += Signature.Length;
             if (sign != Signature)
             {
-                throw new VRCAParsingException("Signature did not match");
+                throw new VRCAParsingException($"Signature did not match: {sign}");
             }
 
             var nameLen = BitConverter.ToInt32(bytes, index);
             index += 4;
 
-            var name = BitConverter.ToString(bytes, index, nameLen);
+            var name = Encoding.ASCII.GetString(bytes.Skip(index).Take(nameLen).ToArray());
             index += nameLen;
 
             List<VertexIdentifier> verticies = new List<VertexIdentifier>();
@@ -61,9 +61,9 @@ namespace Assets.VRCAssetAdd
             {
                 var position = new Vector3
                 {
-                    x = BitConverter.ToInt32(bytes, index),
-                    y = BitConverter.ToInt32(bytes, index + 4),
-                    z = BitConverter.ToInt32(bytes, index + 8) 
+                    x = BitConverter.ToSingle(bytes, index),
+                    y = BitConverter.ToSingle(bytes, index + 4),
+                    z = BitConverter.ToSingle(bytes, index + 8) 
                 };
                 index += 12;
 
@@ -97,7 +97,6 @@ namespace Assets.VRCAssetAdd
                     b = b,
                     c = c
                 };
-                index += 12;
 
                 verticies.Add(new VertexIdentifier()
                 {

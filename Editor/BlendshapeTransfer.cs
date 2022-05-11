@@ -47,6 +47,7 @@ public class BlendshapeTransfer : EditorWindow
         var in_btn = rootVisualElement.Q<Button>("in_btn");
 
         out_btn.RegisterCallback<MouseUpEvent>((evt) => { HandleExport(); });
+        in_btn.RegisterCallback<MouseUpEvent>((evt) => { HandleInport(); });
     }
 
     private void HandleMeshChange()
@@ -109,6 +110,9 @@ public class BlendshapeTransfer : EditorWindow
                 affectedVerticies.Add(i);
         }
 
+        foreach (int i in affectedVerticies)
+            Debug.Log($"{i} at position {mesh.vertices[i].x} | {mesh.vertices[i].y} | {mesh.vertices[i].z}");
+
         var IdVerts = IdentifyVerticiesFromIndex(affectedVerticies, mesh);
         var vertDeltas = RemapDeltasArray(vertices, affectedVerticies);
         var normDeltas = RemapDeltasArray(normals, affectedVerticies);
@@ -130,8 +134,6 @@ public class BlendshapeTransfer : EditorWindow
             Debug.LogError("Path was 0");
             return;
         }
-
-        Debug.Log(bsFile.ConvertToBytes().Length);
 
         File.WriteAllBytes(path, bsFile.ConvertToBytes());
     }
@@ -179,18 +181,39 @@ public class BlendshapeTransfer : EditorWindow
     {
         for (int i = 0; i < mesh.triangles.Length; i += 3)
         {
-            var tri = new VRCATriangle()
+            if (mesh.triangles[i] == indexToContain || mesh.triangles[i+1] == indexToContain || mesh.triangles[i+2] == indexToContain)
             {
-                a = mesh.vertices[mesh.triangles[i]],
-                b = mesh.vertices[mesh.triangles[i + 1]],
-                c = mesh.vertices[mesh.triangles[i + 2]]
-            };
-
-            if (tri.Contains(mesh.vertices[indexToContain]))
-                return tri;
+                return new VRCATriangle()
+                {
+                    a = mesh.vertices[mesh.triangles[i]],
+                    b = mesh.vertices[mesh.triangles[i + 1]],
+                    c = mesh.vertices[mesh.triangles[i + 2]]
+                };
+            }
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// returns -1 if not found.
+    /// </summary>
+    /// <param name="tri"></param>
+    /// <param name="mesh"></param>
+    /// <returns></returns>
+    private int TriangleToIndex(VRCATriangle tri, Mesh mesh)
+    {
+        for (int i = 0; i < mesh.triangles.Length; i += 3)
+        {
+            if (tri.Contains(mesh.vertices[mesh.triangles[i]])
+                && tri.Contains(mesh.vertices[mesh.triangles[i+1]])
+                && tri.Contains(mesh.vertices[mesh.triangles[i+2]]))
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     private List<string> GetBlendshapeNames(Mesh mesh)
@@ -203,5 +226,105 @@ public class BlendshapeTransfer : EditorWindow
         }
 
         return res;
+    }
+
+    private int PositionToVertIndex(Vector3 pos, Mesh mesh)
+    {
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if (mesh.vertices[i] == pos)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private void HandleInport()
+    {
+        var path = EditorUtility.OpenFilePanel("Open BlendShapeTransfer File", null, "bst");
+
+        if (path.Length == 0)
+        {
+            Debug.LogError("Path was 0");
+            return;
+        }
+
+        var in_mesh = rootVisualElement.Q<ObjectField>("in_mesh");
+        var mesh_go = in_mesh.value as GameObject;
+
+        var mr = mesh_go.GetComponent<SkinnedMeshRenderer>();
+
+        if (mr == null)
+        {
+            // TODO: Add Error
+            Debug.LogError("Selected object did not have a skinned mesh renderer");
+            return;
+        }
+
+        var mesh = mr.sharedMesh;
+
+        var bytes = File.ReadAllBytes(path);
+        var bs = VRCABlendShape.FromBytes(bytes);
+
+        if (mesh.GetBlendShapeIndex(bs.Name) != -1)
+        {
+            Debug.LogError($"BlendShape {bs.Name} already exists");
+            return;
+        }
+
+        var vertMap = new int[bs.Verticies.Length];  // Map from VRCABlendShape indeces to Mesh indices
+        int j = 0;
+        foreach (var vert in bs.Verticies)
+        {
+            // tri is the index of the first vertex in the triangle, same as how Mesh.trangles is made
+            var tri = TriangleToIndex(vert.Triangle, mesh);
+
+            if (tri == -1)
+            {
+                Debug.LogWarning($"Triangle not found, assuming position as unique");
+                vertMap[j++] = PositionToVertIndex(vert.Position, mesh);
+                continue;
+            }
+
+            Debug.Log($"'{vert.Position}' Found tri: {mesh.triangles[tri]} {mesh.triangles[tri + 1]} {mesh.triangles[tri + 2]}");
+
+            var found = false;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (vert.Position == mesh.vertices[mesh.triangles[tri + i]])
+                {
+                    vertMap[j++] = mesh.triangles[tri + i];
+                    found = true;
+                    break;
+                }
+            }
+            if (found) continue;
+
+            Debug.LogWarning($"Vertex not found, skipping. {vert.Position}");
+            vertMap[j++] = -1;
+        }
+
+        foreach (var i in vertMap)
+            Debug.Log(i);
+
+        var deltaVerticies = new Vector3[mesh.vertexCount];
+        var deltaNormals = new Vector3[mesh.vertexCount];
+        var deltaTangents = new Vector3[mesh.vertexCount];
+
+        for (int i = 0; i < vertMap.Length; i++)
+        {
+            // It was not mapped earlier
+            if (vertMap[i] == -1)
+                continue;
+
+            deltaVerticies[vertMap[i]] = bs.VertDeltas[i];
+            deltaNormals[vertMap[i]] = bs.VertDeltas[i];
+            deltaTangents[vertMap[i]] = bs.VertDeltas[i];
+        }
+
+        mesh.AddBlendShapeFrame(bs.Name, 100.0f, deltaVerticies, deltaNormals, deltaTangents);
+        mesh.RecalculateNormals();
+        mesh.RecalculateTangents();
+        mesh.RecalculateBounds();
     }
 }

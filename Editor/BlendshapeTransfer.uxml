@@ -19,5 +19,5 @@
         <engine:Button text="Export" name="out_btn" />
     </engine:Box>
 
-    <engine:Label text="" name="error">
+    <engine:Label text="" name="error" />
 </engine:UXML>

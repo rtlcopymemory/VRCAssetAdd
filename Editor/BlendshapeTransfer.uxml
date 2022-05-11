@@ -20,4 +20,5 @@
     </engine:Box>
 
     <engine:Label text="" name="error" />
+    <engine:Label text="" name="warning" />
 </engine:UXML>

@@ -59,7 +59,6 @@ public class BlendshapeTransfer : EditorWindow
 
         if (mr == null)
         {
-            // TODO: Add Error
             ShowError("Selected object did not have a skinned mesh renderer");
             return;
         }
@@ -79,6 +78,8 @@ public class BlendshapeTransfer : EditorWindow
 
     private void HandleExport()
     {
+        ClearTexts();
+        ShowWarning("This operation can take minutes");
         var popupField = rootVisualElement.Q<PopupField<string>>("shapes-popout");
         var blendshapeName = popupField.value;
 
@@ -237,6 +238,8 @@ public class BlendshapeTransfer : EditorWindow
 
     private void HandleInport()
     {
+        ClearTexts();
+        ShowWarning("This operation can take minutes");
         var path = EditorUtility.OpenFilePanel("Open BlendShapeTransfer File", null, "bst");
 
         if (path.Length == 0)
@@ -325,10 +328,26 @@ public class BlendshapeTransfer : EditorWindow
         mesh.RecalculateBounds();
     }
 
+    private void ClearTexts()
+    {
+        var error = rootVisualElement.Q<Label>("error");
+        var warning = rootVisualElement.Q<Label>("warning");
+
+        error.Clear();
+        warning.Clear();
+    }
+
     private void ShowError(string message)
     {
         var error = rootVisualElement.Q<Label>("error");
         error.Clear();
         error.text = message;
+    }
+
+    private void ShowWarning(string message)
+    {
+        var warning = rootVisualElement.Q<Label>("warning");
+        warning.Clear();
+        warning.text = message;
     }
 }

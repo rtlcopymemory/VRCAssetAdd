@@ -16,13 +16,13 @@ namespace Assets.VRCAssetAdd
     public class VRCATriangle
     {
         /// TODO: These needs to be the coordinates of the verticies
-        public int a;
-        public int b;
-        public int c;
+        public Vector3 a;
+        public Vector3 b;
+        public Vector3 c;
 
-        public bool Contains(int index)
+        public bool Contains(Vector3 vect)
         {
-            return a == index || b == index || c == index;
+            return a == vect || b == vect || c == vect;
         }
     }
 }

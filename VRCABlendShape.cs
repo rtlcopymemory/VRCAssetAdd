@@ -67,11 +67,35 @@ namespace Assets.VRCAssetAdd
                 };
                 index += 12;
 
+                var a = new Vector3()
+                {
+                    x = BitConverter.ToSingle(bytes, index),
+                    y = BitConverter.ToSingle(bytes, index + 4),
+                    z = BitConverter.ToSingle(bytes, index + 8)
+                };
+                index += 12;
+
+                var b = new Vector3()
+                {
+                    x = BitConverter.ToSingle(bytes, index),
+                    y = BitConverter.ToSingle(bytes, index + 4),
+                    z = BitConverter.ToSingle(bytes, index + 8)
+                };
+                index += 12;
+
+                var c = new Vector3()
+                {
+                    x = BitConverter.ToSingle(bytes, index),
+                    y = BitConverter.ToSingle(bytes, index + 4),
+                    z = BitConverter.ToSingle(bytes, index + 8)
+                };
+                index += 12;
+
                 var triangle = new VRCATriangle()
                 {
-                    a = BitConverter.ToInt32(bytes, index),
-                    b = BitConverter.ToInt32(bytes, index + 4),
-                    c = BitConverter.ToInt32(bytes, index + 8),
+                    a = a,
+                    b = b,
+                    c = c
                 };
                 index += 12;
 
@@ -111,35 +135,43 @@ namespace Assets.VRCAssetAdd
 
         public byte[] ConvertToBytes()
         {
-            var bytes = new List<byte>();
-            bytes.Concat(Encoding.ASCII.GetBytes(Signature));
-            bytes.Concat(BitConverter.GetBytes(Name.Length));
-            bytes.Concat(Encoding.ASCII.GetBytes(Name));
+            var bytes = new byte[0];
+            bytes = bytes.Concat(Encoding.ASCII.GetBytes(Signature)).ToArray();
+            bytes = bytes.Concat(BitConverter.GetBytes(Name.Length)).ToArray();
+            bytes = bytes.Concat(Encoding.ASCII.GetBytes(Name)).ToArray();
 
             for (int i = 0; i < Verticies.Length; i++)
             {
-                bytes.Concat(BitConverter.GetBytes(Verticies[i].Position.x));
-                bytes.Concat(BitConverter.GetBytes(Verticies[i].Position.y));
-                bytes.Concat(BitConverter.GetBytes(Verticies[i].Position.z));
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Position.x)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Position.y)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Position.z)).ToArray();
 
-                bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.a));
-                bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.b));
-                bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.c));
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.a.x)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.a.y)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.a.z)).ToArray();
 
-                bytes.Concat(BitConverter.GetBytes(VertDeltas[i].x));
-                bytes.Concat(BitConverter.GetBytes(VertDeltas[i].y));
-                bytes.Concat(BitConverter.GetBytes(VertDeltas[i].z));
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.b.x)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.b.y)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.b.z)).ToArray();
 
-                bytes.Concat(BitConverter.GetBytes(NormDeltas[i].x));
-                bytes.Concat(BitConverter.GetBytes(NormDeltas[i].y));
-                bytes.Concat(BitConverter.GetBytes(NormDeltas[i].z));
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.c.x)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.c.y)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(Verticies[i].Triangle.c.z)).ToArray();
 
-                bytes.Concat(BitConverter.GetBytes(TanDeltas[i].x));
-                bytes.Concat(BitConverter.GetBytes(TanDeltas[i].y));
-                bytes.Concat(BitConverter.GetBytes(TanDeltas[i].z));
+                bytes = bytes.Concat(BitConverter.GetBytes(VertDeltas[i].x)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(VertDeltas[i].y)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(VertDeltas[i].z)).ToArray();
+
+                bytes = bytes.Concat(BitConverter.GetBytes(NormDeltas[i].x)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(NormDeltas[i].y)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(NormDeltas[i].z)).ToArray();
+
+                bytes = bytes.Concat(BitConverter.GetBytes(TanDeltas[i].x)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(TanDeltas[i].y)).ToArray();
+                bytes = bytes.Concat(BitConverter.GetBytes(TanDeltas[i].z)).ToArray();
             }
 
-            return bytes.ToArray();
+            return bytes;
         }
     }
 }
@@ -151,11 +183,15 @@ namespace Assets.VRCAssetAdd
 // +-------------------------------------------------------------------------------+
 // |     Signature     |    Name Length    | Blendshape Name (variable size)       |
 // +-------------------------------------------------------------------------------+
-// |     Position.x    |     Position.y    |     Position.z    |     Triangle.a    |
+// |     Position.x    |     Position.y    |     Position.z    |    Triangle.a.x   |
 // +-------------------------------------------------------------------------------+
-// |     Triangle.b    |     Triangle.c    |    vertDeltas.x   |    vertDeltas.y   |
+// |    Triangle.a.y   |    Triangle.a.z   |    Triangle.b.x   |    Triangle.b.y   |  
 // +-------------------------------------------------------------------------------+
-// |    vertDeltas.z   |    normDeltas.x   |    normDeltas.y   |    normDeltas.z   |
+// |    Triangle.b.z   |    Triangle.c.x   |    Triangle.c.y   |    Triangle.c.z   |  
 // +-------------------------------------------------------------------------------+
-// |    tanDeltas.x    |    tanDeltas.y    |    tanDeltas.z    |        NEXT       |
+// |    vertDeltas.x   |    vertDeltas.y   |    vertDeltas.z   |    normDeltas.x   |
+// +-------------------------------------------------------------------------------+
+// |    normDeltas.y   |    normDeltas.z   |    tanDeltas.x    |    tanDeltas.y    |
+// +-------------------------------------------------------------------------------+
+// |    tanDeltas.z    |        NEXT                                               |
 // +-------------------------------------------------------------------------------+

@@ -131,6 +131,8 @@ public class BlendshapeTransfer : EditorWindow
             return;
         }
 
+        Debug.Log(bsFile.ConvertToBytes().Length);
+
         File.WriteAllBytes(path, bsFile.ConvertToBytes());
     }
 
@@ -179,12 +181,12 @@ public class BlendshapeTransfer : EditorWindow
         {
             var tri = new VRCATriangle()
             {
-                a = mesh.triangles[i],
-                b = mesh.triangles[i + 1],
-                c = mesh.triangles[i + 2]
+                a = mesh.vertices[mesh.triangles[i]],
+                b = mesh.vertices[mesh.triangles[i + 1]],
+                c = mesh.vertices[mesh.triangles[i + 2]]
             };
 
-            if (tri.Contains(indexToContain))
+            if (tri.Contains(mesh.vertices[indexToContain]))
                 return tri;
         }
 

@@ -15,3 +15,8 @@
 	margin: 6px;
 	color: red;
 }
+
+#warning {
+	margin: 6px;
+	color: yellow;
+}

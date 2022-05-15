@@ -255,7 +255,6 @@ public class BlendshapeTransfer : EditorWindow
 
         if (mr == null)
         {
-            // TODO: Add Error
             ShowError("Selected object did not have a skinned mesh renderer");
             return;
         }

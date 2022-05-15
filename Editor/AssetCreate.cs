@@ -43,9 +43,17 @@ public class AssetCreate : EditorWindow
     {
         var avatarField = rootVisualElement.Q<ObjectField>("avatar-field");
         avatarField.objectType = typeof(GameObject);
+        avatarField.RegisterValueChangedCallback((evt) => { 
+            var go = evt.newValue as GameObject;
+            go.transform.position = Vector3.zero;
+        });
 
         var assetField = rootVisualElement.Q<ObjectField>("asset-field");
         assetField.objectType = typeof(GameObject);
+        assetField.RegisterValueChangedCallback((evt) => {
+            var go = evt.newValue as GameObject;
+            go.transform.position = Vector3.zero;
+        });
 
         var targetField = rootVisualElement.Q<ObjectField>("target-field");
         targetField.objectType = typeof(GameObject);

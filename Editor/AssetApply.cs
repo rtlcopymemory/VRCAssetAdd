@@ -35,9 +35,17 @@ public class AssetApply : EditorWindow
     {
         var avatarField = root.Q<ObjectField>("avatar-field");
         avatarField.objectType = typeof(GameObject);
+        avatarField.RegisterValueChangedCallback((evt) => {
+            var go = evt.newValue as GameObject;
+            go.transform.position = Vector3.zero;
+        });
 
         var assetField = root.Q<ObjectField>("asset-field");
         assetField.objectType = typeof(GameObject);
+        assetField.RegisterValueChangedCallback((evt) => {
+            var go = evt.newValue as GameObject;
+            go.transform.position = Vector3.zero;
+        });
     }
 
     private void Apply()

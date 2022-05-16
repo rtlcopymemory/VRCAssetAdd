@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Assets.VRCAssetAdd.Editor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.VRCAssetAdd
 {
-    internal class ModelMapper
+    public class ModelMapper
     {
         // List<int>: Because of how Unity has to split every polygon into tris
         // most if not all models will have overlapping vertices
@@ -17,9 +16,19 @@ namespace Assets.VRCAssetAdd
         // Speeds up vert recognition
         private readonly Dictionary<Vector3, List<int>> TrisMapping;
 
-        ModelMapper(Mesh mesh)
+        // This maps the indices instead. Used for when I create the blendshape and
+        // need to find a triangle that contains the index
+        private readonly Dictionary<int, List<int>> TriIndexMapping;
+
+        private readonly Mesh mesh;
+
+        public ModelMapper(Mesh mesh)
         {
+            this.mesh = mesh != null ? mesh : throw new ArgumentNullException();
             VertMapping = new Dictionary<Vector3, List<int>>();
+            TrisMapping = new Dictionary<Vector3, List<int>>();
+            TriIndexMapping = new Dictionary<int, List<int>>();
+
             for (int i = 0; i < mesh.vertices.Length; i++)
             {
                 if (!VertMapping.ContainsKey(mesh.vertices[i]))
@@ -28,16 +37,61 @@ namespace Assets.VRCAssetAdd
                 if (!TrisMapping.ContainsKey(mesh.vertices[i]))
                     TrisMapping[mesh.vertices[i]] = new List<int>();
 
-                VertMapping[mesh.vertices[i]].Add(i);
+                if (!TriIndexMapping.ContainsKey(i))
+                    TriIndexMapping[i] = new List<int>();
 
-                for (int j = 0; j < mesh.triangles.Length; j += 3)
+                VertMapping[mesh.vertices[i]].Add(i);
+            }
+
+            for (int j = 0; j < mesh.triangles.Length; j += 3)
+            {
+                var i = mesh.triangles[j];
+                TrisMapping[mesh.vertices[i]].Add(j); // Position to tri candidates
+                TriIndexMapping[i].Add(j); // index to tri candidates
+
+                i = mesh.triangles[j + 1];
+                TrisMapping[mesh.vertices[i]].Add(j); // Position to tri candidates
+                TriIndexMapping[i].Add(j); // index to tri candidates
+
+                i = mesh.triangles[j + 2];
+                TrisMapping[mesh.vertices[i]].Add(j); // Position to tri candidates
+                TriIndexMapping[i].Add(j); // index to tri candidates
+            }
+        }
+
+        public int IdentifyVertex(Vector3 position, VRCATriangle triangle)
+        {
+            if (!TrisMapping.ContainsKey(position))
+            {
+                throw new VRCAddException("Could not find position in the tris");
+            }
+
+            var candidates = TrisMapping[position];
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                var candidate = candidates[i];
+                var a = mesh.vertices[candidate];
+                var b = mesh.vertices[candidate + 1];
+                var c = mesh.vertices[candidate + 2];
+                if (triangle.Contains(a) && triangle.Contains(b) && triangle.Contains(c))
                 {
-                    if (mesh.triangles[j] == i || mesh.triangles[j + 1] == i || mesh.triangles[j + 2] == i)
-                    {
-                        TrisMapping[mesh.vertices[i]].Add(j);
-                    }
+                    return a == position ? candidate : b == position ? candidate + 1 : candidate + 2;
                 }
             }
+
+            return -1;
+        }
+
+        public VRCATriangle FindTriangleContaining(int index)
+        {
+            var tri = TriIndexMapping[index].First();
+
+            return new VRCATriangle()
+            {
+                a = mesh.vertices[mesh.triangles[tri]],
+                b = mesh.vertices[mesh.triangles[tri + 1]],
+                c = mesh.vertices[mesh.triangles[tri + 2]]
+            };
         }
     }
 }

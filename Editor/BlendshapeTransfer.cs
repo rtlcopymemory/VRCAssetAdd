@@ -79,7 +79,6 @@ public class BlendshapeTransfer : EditorWindow
     private void HandleExport()
     {
         ClearTexts();
-        ShowWarning("This operation can take minutes");
         var popupField = rootVisualElement.Q<PopupField<string>>("shapes-popout");
         var blendshapeName = popupField.value;
 
@@ -148,12 +147,13 @@ public class BlendshapeTransfer : EditorWindow
     private List<VertexIdentifier> IdentifyVerticiesFromIndex(List<int> indeces, Mesh mesh)
     {
         var res = new List<VertexIdentifier>();
+        var modelMap = new ModelMapper(mesh);
         foreach (var i in indeces)
         {
             var vertID = new VertexIdentifier
             {
                 Position = mesh.vertices[i],
-                Triangle = FindTriangleContaining(i, mesh)
+                Triangle = modelMap.FindTriangleContaining(i)
             };
 
             res.Add(vertID);
@@ -172,24 +172,6 @@ public class BlendshapeTransfer : EditorWindow
         }
 
         return vertDeltas;
-    }
-
-    private VRCATriangle FindTriangleContaining(int indexToContain, Mesh mesh)
-    {
-        for (int i = 0; i < mesh.triangles.Length; i += 3)
-        {
-            if (mesh.triangles[i] == indexToContain || mesh.triangles[i + 1] == indexToContain || mesh.triangles[i + 2] == indexToContain)
-            {
-                return new VRCATriangle()
-                {
-                    a = mesh.vertices[mesh.triangles[i]],
-                    b = mesh.vertices[mesh.triangles[i + 1]],
-                    c = mesh.vertices[mesh.triangles[i + 2]]
-                };
-            }
-        }
-
-        return null;
     }
 
     /// <summary>

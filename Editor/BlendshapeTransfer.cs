@@ -47,7 +47,7 @@ public class BlendshapeTransfer : EditorWindow
         var in_btn = rootVisualElement.Q<Button>("in_btn");
 
         out_btn.RegisterCallback<MouseUpEvent>((evt) => { HandleExport(); });
-        in_btn.RegisterCallback<MouseUpEvent>((evt) => { HandleInport(); });
+        in_btn.RegisterCallback<MouseUpEvent>((evt) => { HandleImport(); });
     }
 
     private void HandleMeshChange()
@@ -174,27 +174,6 @@ public class BlendshapeTransfer : EditorWindow
         return vertDeltas;
     }
 
-    /// <summary>
-    /// returns -1 if not found.
-    /// </summary>
-    /// <param name="tri"></param>
-    /// <param name="mesh"></param>
-    /// <returns></returns>
-    private int TriangleToIndex(VRCATriangle tri, Mesh mesh)
-    {
-        for (int i = 0; i < mesh.triangles.Length; i += 3)
-        {
-            if (tri.Contains(mesh.vertices[mesh.triangles[i]])
-                && tri.Contains(mesh.vertices[mesh.triangles[i + 1]])
-                && tri.Contains(mesh.vertices[mesh.triangles[i + 2]]))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     private List<string> GetBlendshapeNames(Mesh mesh)
     {
         var res = new List<string>();
@@ -207,18 +186,7 @@ public class BlendshapeTransfer : EditorWindow
         return res;
     }
 
-    private int PositionToVertIndex(Vector3 pos, Mesh mesh)
-    {
-        for (int i = 0; i < mesh.vertices.Length; i++)
-        {
-            if (mesh.vertices[i] == pos)
-                return i;
-        }
-
-        return -1;
-    }
-
-    private void HandleInport()
+    private void HandleImport()
     {
         ClearTexts();
         ShowWarning("This operation can take minutes");
@@ -226,7 +194,7 @@ public class BlendshapeTransfer : EditorWindow
 
         if (path.Length == 0)
         {
-            ShowError("Path was 0");
+            ShowError("No File Selected");
             return;
         }
 
@@ -253,40 +221,26 @@ public class BlendshapeTransfer : EditorWindow
         }
 
         if (mesh_go.transform.localScale.x != bs.GetScale().x)
-            bs.ToScale(mesh_go.transform.localScale);
-
-        var vertMap = new int[bs.Verticies.Length];  // Map from VRCABlendShape indeces to Mesh indices
-        int j = 0;
-        foreach (var vert in bs.Verticies)
         {
-            // tri is the index of the first vertex in the triangle, same as how Mesh.trangles is made
-            var tri = TriangleToIndex(vert.Triangle, mesh);
+            // bs.ToScale(mesh_go.transform.localScale);
 
-            if (tri == -1)
-            {
-                Debug.LogWarning($"Triangle not found, assuming position as unique");
-                vertMap[j++] = PositionToVertIndex(vert.Position, mesh);
-                continue;
-            }
-
-            var found = false;
-            for (int i = 0; i < 3; ++i)
-            {
-                if (vert.Position == mesh.vertices[mesh.triangles[tri + i]])
-                {
-                    vertMap[j++] = mesh.triangles[tri + i];
-                    found = true;
-                    break;
-                }
-            }
-            if (found) continue;
-
-            Debug.LogWarning($"Vertex not found, skipping. {vert.Position}");
-            vertMap[j++] = -1;
+            ShowError($"Your model scale ({mesh_go.transform.localScale.x}) differs from the original ({bs.GetScale().x}).\n"
+                + "Please export it correctly or ask the creator for a version compatible with yours");
+            return;
         }
 
-        foreach (var i in vertMap)
-            Debug.Log(i);
+        var modelMap = new ModelMapper(mesh);
+
+        var vertMap = new int[bs.Verticies.Length];  // Map from VRCABlendShape indeces to Mesh indices
+        for (var i = 0; i < bs.Verticies.Length; i++)
+        {
+            var index = modelMap.IdentifyVertex(bs.Verticies[i].Position, bs.Verticies[i].Triangle);
+
+            if (index == -1)
+                Debug.LogWarning($"Could not find vertex {bs.Verticies[i].Position}");
+
+            vertMap[i] = index;
+        }
 
         var deltaVerticies = new Vector3[mesh.vertexCount];
         var deltaNormals = new Vector3[mesh.vertexCount];
@@ -314,21 +268,19 @@ public class BlendshapeTransfer : EditorWindow
         var error = rootVisualElement.Q<Label>("error");
         var warning = rootVisualElement.Q<Label>("warning");
 
-        error.Clear();
-        warning.Clear();
+        error.text = "";
+        warning.text = "";
     }
 
     private void ShowError(string message)
     {
         var error = rootVisualElement.Q<Label>("error");
-        error.Clear();
         error.text = message;
     }
 
     private void ShowWarning(string message)
     {
         var warning = rootVisualElement.Q<Label>("warning");
-        warning.Clear();
         warning.text = message;
     }
 }

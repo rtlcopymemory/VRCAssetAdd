@@ -14,9 +14,11 @@
 #error {
 	margin: 6px;
 	color: red;
+	white-space: normal;
 }
 
 #warning {
 	margin: 6px;
 	color: yellow;
+	white-space: normal;
 }

@@ -5,6 +5,7 @@
     xmlns:editor="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
+    <engine:Label text="THIS WILL MODIFY THE MESH IN THE UNITY PROJECT. PLEASE BACKUP YOUR PROJECT" class="backupwarn" />
     <engine:Box class="boxes">
         <engine:Label text="Import Blendshape" class="title" />
         <editor:ObjectField label="Mesh" name="in_mesh" type="UnityEngine.GameObject" />

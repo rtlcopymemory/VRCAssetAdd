@@ -1,5 +1,6 @@
 :root {
 	padding: 12px;
+	white-space: normal;
 }
 
 .boxes {
@@ -9,6 +10,14 @@
 
 .title {
 	-unity-font-style: bold;
+	white-space: normal;
+}
+
+.backupwarn {
+	-unity-font-style: bold;
+	white-space: normal;
+	color: yellow;
+	margin-bottom: 6px;
 }
 
 #error {

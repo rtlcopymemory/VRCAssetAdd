@@ -55,9 +55,8 @@ public class BlendshapeTransfer : EditorWindow
         var out_mesh = rootVisualElement.Q<ObjectField>("out_mesh");
         var mesh_go = out_mesh.value as GameObject;
 
-        var mr = mesh_go.GetComponent<SkinnedMeshRenderer>();
-
-        if (mr == null)
+        
+        if (!mesh_go.TryGetComponent<SkinnedMeshRenderer>(out var mr))
         {
             ShowError("Selected object did not have a skinned mesh renderer");
             return;
@@ -85,9 +84,8 @@ public class BlendshapeTransfer : EditorWindow
         var out_mesh = rootVisualElement.Q<ObjectField>("out_mesh");
         var mesh_go = out_mesh.value as GameObject;
 
-        var mr = mesh_go.GetComponent<SkinnedMeshRenderer>();
-
-        if (mr == null)
+        
+        if (!mesh_go.TryGetComponent<SkinnedMeshRenderer>(out var mr))
         {
             ShowError("Selected object did not have a skinned mesh renderer");
             return;
@@ -105,8 +103,11 @@ public class BlendshapeTransfer : EditorWindow
         List<int> affectedVerticies = new List<int>();
         for (int i = 0; i < mesh.vertexCount; i++)
         {
-            if (vertices[i].x != 0 || vertices[i].y != 0 || vertices[i].z != 0)
+            if (DeltasHaveDifferences(vertices[i], normals[i], tangents[i]))
+            {
                 affectedVerticies.Add(i);
+                Debug.Log("Normal deltas: (" + normals[i].x + ", " + normals[i].y + ", " + normals[i].z + ")");
+            }
         }
 
         var IdVerts = IdentifyVerticiesFromIndex(affectedVerticies, mesh);
@@ -132,6 +133,13 @@ public class BlendshapeTransfer : EditorWindow
         }
 
         File.WriteAllBytes(path, bsFile.ConvertToBytes());
+    }
+
+    private bool DeltasHaveDifferences(Vector3 vertex, Vector3 normal, Vector3 tangent)
+    {
+        return normal.x != 0 || normal.y != 0 || normal.z != 0 
+            || vertex.x != 0 || vertex.y != 0 || vertex.z != 0 
+            || tangent.x != 0 || tangent.y != 0 || tangent.z != 0;
     }
 
     /// <summary>
@@ -258,9 +266,16 @@ public class BlendshapeTransfer : EditorWindow
         }
 
         mesh.AddBlendShapeFrame(bs.Name, 100.0f, deltaVerticies, deltaNormals, deltaTangents);
-        mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
-        mesh.RecalculateBounds();
+        //mesh.RecalculateNormals();
+        //mesh.RecalculateTangents();
+        //mesh.RecalculateBounds();
+
+        //mesh.UploadMeshData(false);
+
+        mr.SetBlendShapeWeight(mesh.GetBlendShapeIndex(bs.Name), 0);
+
+        ClearTexts();
+        ShowWarning("Done");
     }
 
     private void ClearTexts()
